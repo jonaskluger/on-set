@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from helper import (
     _dataset_dependencies,
     _dataset_lookup,
@@ -17,6 +18,13 @@ app = FastAPI(
     description="API wrapper for the VES On-Set Data dataset.",
     version="0.1.0",
     openapi_url="/api-docs/swagger.json",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["GET", "OPTIONS"],
+    allow_headers=["*"],
 )
 
 
