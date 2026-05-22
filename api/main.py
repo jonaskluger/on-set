@@ -49,3 +49,26 @@ def get_scope_definition(slug: str) -> dict[str, Any]:
         return {"data": slug_data[slug]}
 
     raise HTTPException(status_code=404, detail=f"Unknown scope definition: {slug}")
+
+
+@app.get("/api/v1/vfx-types")
+def get_vfx_types() -> dict[str, Any]:
+    data = _load_data()
+    pairs = _extract_pairs(data.get("VFX Types", []))
+    items = _pairs_to_items(pairs)
+    return {
+        "data": items,
+        "meta": {"count": len(items)},
+    }
+
+
+@app.get("/api/v1/vfx-types/{slug}")
+def get_vfx_type(slug: str) -> dict[str, Any]:
+    data = _load_data()
+    pairs = _extract_pairs(data.get("VFX Types", []))
+    slug_data = _pairs_to_slug_map(pairs)
+
+    if slug in slug_data:
+        return {"data": slug_data[slug]}
+
+    raise HTTPException(status_code=404, detail=f"Unknown vfx type: {slug}")
