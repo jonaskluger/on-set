@@ -134,3 +134,54 @@ def _dataset_lookup(
         index[_to_slug(ds["title"])] = ds
 
     return datasets, index
+
+
+def _dataset_dependencies(dataset: dict[str, Any]) -> dict[str, Any]:
+    """Build creator->dataset and dataset->consumer dependency edges.
+
+    Returns a graph-friendly structure with:
+    - inbound: edges from each creator to this dataset
+    - outbound: edges from this dataset to each consumer
+    - counts: number of inbound and outbound edges
+    """
+    inbound = [
+        {
+            "from": {
+                "type": "creator",
+                "name": creator,
+            },
+            "to": {
+                "type": "dataset",
+                "id": dataset["id"],
+                "slug": dataset["slug"],
+                "name": dataset["name"],
+            },
+            "relationship": "creates",
+        }
+        for creator in dataset.get("creators", [])
+    ]
+    outbound = [
+        {
+            "from": {
+                "type": "dataset",
+                "id": dataset["id"],
+                "slug": dataset["slug"],
+                "name": dataset["name"],
+            },
+            "to": {
+                "type": "consumer",
+                "name": consumer,
+            },
+            "relationship": "consumed_by",
+        }
+        for consumer in dataset.get("consumers", [])
+    ]
+
+    return {
+        "inbound": inbound,
+        "outbound": outbound,
+        "counts": {
+            "inbound": len(inbound),
+            "outbound": len(outbound),
+        },
+    }
