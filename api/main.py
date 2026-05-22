@@ -4,7 +4,7 @@ from typing import Any
 
 from fastapi import FastAPI
 
-from .helper import _load_data
+from helper import _load_data
 
 app = FastAPI(
     title="VES On-Set Data API",
