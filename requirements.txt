@@ -1,4 +1,2 @@
 beautifulsoup4
 PyYAML
-fastapi
-uvicorn[standard]
