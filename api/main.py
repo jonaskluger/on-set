@@ -4,6 +4,7 @@ from typing import Any
 
 from fastapi import FastAPI, HTTPException
 from helper import (
+    _dataset_lookup,
     _extract_pairs,
     _load_data,
     _pairs_to_items,
@@ -72,3 +73,51 @@ def get_vfx_type(slug: str) -> dict[str, Any]:
         return {"data": slug_data[slug]}
 
     raise HTTPException(status_code=404, detail=f"Unknown vfx type: {slug}")
+
+
+@app.get("/api/v1/data-sets")
+def get_data_sets() -> dict[str, Any]:
+    data = _load_data()
+    datasets, _ = _dataset_lookup(data)
+    return {
+        "data": [
+            {
+                "id": ds["id"],
+                "name": ds["name"],
+                "slug": ds["slug"],
+                "category": ds["category"],
+            }
+            for ds in datasets
+        ],
+        "meta": {"count": len(datasets)},
+    }
+
+
+@app.get("/api/v1/data-sets/{slug}")
+def get_data_set(slug: str) -> dict[str, Any]:
+    data = _load_data()
+    _, index = _dataset_lookup(data)
+
+    dataset = index.get(slug.lower())
+    if not dataset:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Unknown dataset: {slug}. Try id like '4.2' or slug like 'hdris'.",
+        )
+
+    return {
+        "data": {
+            "id": dataset["id"],
+            "title": dataset["title"],
+            "name": dataset["name"],
+            "slug": dataset["slug"],
+            "category": dataset["category"],
+            "description": dataset["description"],
+            "usage": dataset["usage"],
+            "scope": dataset["scope"],
+            "vfx_types": dataset["vfx_types"],
+            "data_collected": dataset["data_collected"],
+            "creators": dataset["creators"],
+            "consumers": dataset["consumers"],
+        }
+    }

@@ -60,3 +60,77 @@ def _extract_pairs(section_items: list[dict[str, Any]]) -> dict[str, str]:
                 continue
             pairs[str(key)] = str(value)
     return pairs
+
+
+def _extract_dataset_entries(raw_data: dict[str, Any]) -> list[dict[str, Any]]:
+    """Flatten the nested "Data Sets" structure into dataset-centric entries.
+
+    The source JSON stores datasets under categories -> subsections -> items.
+    This helper converts each non-empty subsection into one normalized record.
+
+    Parsing rules:
+    - Subsection titles like "4.2 HDRIs" are split into:
+      - id: "4.2"
+      - name: "HDRIs"
+    - If no numeric prefix is present, id is set to "" and name uses the title.
+    - Slug is generated from the dataset name (for example, "HDRIs" -> "hdris").
+
+    Returns dataset entries with ids/slugs and relationship metadata.
+    """
+    entries: list[dict[str, Any]] = []
+    sections = raw_data.get("Data Sets", [])
+
+    for category in sections:
+        category_title = str(category.get("title", "")).strip()
+        for subsection in category.get("subsections", []):
+            subsection_title = str(subsection.get("title", "")).strip()
+            items = subsection.get("items", [])
+
+            if not subsection_title or not items:
+                continue
+
+            item = items[0]
+            m = re.match(r"^(\d+\.\d+)\s*(.*)$", subsection_title)
+            if m:
+                dataset_id = m.group(1)
+                dataset_name = m.group(2).strip(" .-:")
+            else:
+                dataset_id = ""
+                dataset_name = subsection_title
+
+            if not dataset_name:
+                dataset_name = subsection_title
+
+            entries.append(
+                {
+                    "id": dataset_id,
+                    "name": dataset_name,
+                    "title": subsection_title,
+                    "slug": _to_slug(dataset_name),
+                    "category": category_title,
+                    "creators": item.get("Creator", []),
+                    "consumers": item.get("Consumer", []),
+                    "vfx_types": item.get("VFXTypes", []),
+                    "scope": item.get("Scope", []),
+                    "description": item.get("Description", ""),
+                    "usage": item.get("Usage", ""),
+                    "data_collected": item.get("Data Collected", []),
+                }
+            )
+
+    return entries
+
+
+def _dataset_lookup(
+    raw_data: dict[str, Any],
+) -> tuple[list[dict[str, Any]], dict[str, dict[str, Any]]]:
+    datasets = _extract_dataset_entries(raw_data)
+    index: dict[str, dict[str, Any]] = {}
+
+    for ds in datasets:
+        if ds["id"]:
+            index[ds["id"].lower()] = ds
+        index[ds["slug"]] = ds
+        index[_to_slug(ds["title"])] = ds
+
+    return datasets, index
