@@ -4,6 +4,26 @@ from typing import Any
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from definitions import (
+    DATA_SET_DETAIL_EXAMPLE,
+    DATA_SET_LIST_EXAMPLE,
+    DEFINITION_DETAIL_EXAMPLE,
+    DEFINITION_LIST_EXAMPLE,
+    DEPENDENCIES_EXAMPLE,
+    HEALTH_EXAMPLE,
+    NOT_FOUND_EXAMPLE,
+    RAW_DATA_EXAMPLE,
+    VFX_TYPE_DETAIL_EXAMPLE,
+    VFX_TYPE_LIST_EXAMPLE,
+    DataSetDependenciesResponse,
+    DataSetDetailResponse,
+    DataSetListResponse,
+    DefinitionDetailResponse,
+    DefinitionListResponse,
+    ErrorResponse,
+    HealthResponse,
+)
+
 from helper import (
     _dataset_dependencies,
     _dataset_lookup,
@@ -28,17 +48,44 @@ app.add_middleware(
 )
 
 
-@app.get("/health")
-def health() -> dict[str, str]:
+@app.get(
+    "/health",
+    response_model=HealthResponse,
+    responses={
+        200: {
+            "description": "Service health status.",
+            "content": {"application/json": {"example": HEALTH_EXAMPLE}},
+        }
+    },
+)
+def health() -> HealthResponse:
     return {"status": "ok"}
 
 
-@app.get("/api/v1/raw")
+@app.get(
+    "/api/v1/raw",
+    response_model=dict[str, Any],
+    responses={
+        200: {
+            "description": "Raw upstream dataset payload.",
+            "content": {"application/json": {"example": RAW_DATA_EXAMPLE}},
+        }
+    },
+)
 def get_raw_data() -> dict[str, Any]:
     return _load_data()
 
 
-@app.get("/api/v1/scope-definitions")
+@app.get(
+    "/api/v1/scope-definitions",
+    response_model=DefinitionListResponse,
+    responses={
+        200: {
+            "description": "All scope definitions.",
+            "content": {"application/json": {"example": DEFINITION_LIST_EXAMPLE}},
+        }
+    },
+)
 def get_scope_definitions() -> dict[str, Any]:
     data = _load_data()
     pairs = _extract_pairs(data.get("Scope Definitions", []))
@@ -49,7 +96,25 @@ def get_scope_definitions() -> dict[str, Any]:
     }
 
 
-@app.get("/api/v1/scope-definitions/{slug}")
+@app.get(
+    "/api/v1/scope-definitions/{slug}",
+    response_model=DefinitionDetailResponse,
+    responses={
+        200: {
+            "description": "Single scope definition by slug.",
+            "content": {"application/json": {"example": DEFINITION_DETAIL_EXAMPLE}},
+        },
+        404: {
+            "model": ErrorResponse,
+            "description": "Unknown scope definition slug.",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Unknown scope definition: missing-slug"}
+                }
+            },
+        },
+    },
+)
 def get_scope_definition(slug: str) -> dict[str, Any]:
     data = _load_data()
     pairs = _extract_pairs(data.get("Scope Definitions", []))
@@ -61,7 +126,16 @@ def get_scope_definition(slug: str) -> dict[str, Any]:
     raise HTTPException(status_code=404, detail=f"Unknown scope definition: {slug}")
 
 
-@app.get("/api/v1/vfx-types")
+@app.get(
+    "/api/v1/vfx-types",
+    response_model=DefinitionListResponse,
+    responses={
+        200: {
+            "description": "All VFX types.",
+            "content": {"application/json": {"example": VFX_TYPE_LIST_EXAMPLE}},
+        }
+    },
+)
 def get_vfx_types() -> dict[str, Any]:
     data = _load_data()
     pairs = _extract_pairs(data.get("VFX Types", []))
@@ -72,7 +146,25 @@ def get_vfx_types() -> dict[str, Any]:
     }
 
 
-@app.get("/api/v1/vfx-types/{slug}")
+@app.get(
+    "/api/v1/vfx-types/{slug}",
+    response_model=DefinitionDetailResponse,
+    responses={
+        200: {
+            "description": "Single VFX type by slug.",
+            "content": {"application/json": {"example": VFX_TYPE_DETAIL_EXAMPLE}},
+        },
+        404: {
+            "model": ErrorResponse,
+            "description": "Unknown VFX type slug.",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Unknown vfx type: missing-slug"}
+                }
+            },
+        },
+    },
+)
 def get_vfx_type(slug: str) -> dict[str, Any]:
     data = _load_data()
     pairs = _extract_pairs(data.get("VFX Types", []))
@@ -84,7 +176,16 @@ def get_vfx_type(slug: str) -> dict[str, Any]:
     raise HTTPException(status_code=404, detail=f"Unknown vfx type: {slug}")
 
 
-@app.get("/api/v1/data-sets")
+@app.get(
+    "/api/v1/data-sets",
+    response_model=DataSetListResponse,
+    responses={
+        200: {
+            "description": "List all data sets.",
+            "content": {"application/json": {"example": DATA_SET_LIST_EXAMPLE}},
+        }
+    },
+)
 def get_data_sets() -> dict[str, Any]:
     data = _load_data()
     datasets, _ = _dataset_lookup(data)
@@ -102,7 +203,21 @@ def get_data_sets() -> dict[str, Any]:
     }
 
 
-@app.get("/api/v1/data-sets/{slug}")
+@app.get(
+    "/api/v1/data-sets/{slug}",
+    response_model=DataSetDetailResponse,
+    responses={
+        200: {
+            "description": "Get one data set by id, slug, or title slug.",
+            "content": {"application/json": {"example": DATA_SET_DETAIL_EXAMPLE}},
+        },
+        404: {
+            "model": ErrorResponse,
+            "description": "Unknown dataset identifier.",
+            "content": {"application/json": {"example": NOT_FOUND_EXAMPLE}},
+        },
+    },
+)
 def get_data_set(slug: str) -> dict[str, Any]:
     data = _load_data()
     _, index = _dataset_lookup(data)
@@ -132,7 +247,21 @@ def get_data_set(slug: str) -> dict[str, Any]:
     }
 
 
-@app.get("/api/v1/data-sets/{dataset_ref}/dependencies")
+@app.get(
+    "/api/v1/data-sets/{dataset_ref}/dependencies",
+    response_model=DataSetDependenciesResponse,
+    responses={
+        200: {
+            "description": "Creator and consumer dependency edges for one data set.",
+            "content": {"application/json": {"example": DEPENDENCIES_EXAMPLE}},
+        },
+        404: {
+            "model": ErrorResponse,
+            "description": "Unknown dataset identifier.",
+            "content": {"application/json": {"example": NOT_FOUND_EXAMPLE}},
+        },
+    },
+)
 def get_data_set_dependencies(dataset_ref: str) -> dict[str, Any]:
     data = _load_data()
     _, index = _dataset_lookup(data)
