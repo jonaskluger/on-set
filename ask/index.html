@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Who Should I Talk To?</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <h1>Who Should I Talk To?</h1>
+      <p class="subtitle">
+        Type a keyword like <strong>HDRIs or lens</strong>, then see who creates
+        and who consumes it.
+      </p>
+    </header>
+
+    <main class="app">
+      <section class="panel controls-panel">
+        <form id="searchForm" class="search" autocomplete="off">
+          <button
+            id="toggleAllBtn"
+            class="toggle-btn"
+            type="button"
+            aria-expanded="false"
+          >
+            Show all options
+          </button>
+          <input
+            id="queryInput"
+            type="text"
+            placeholder="Search for: HDRIs, Lens, ..."
+            aria-label="Keyword query"
+          />
+          <button id="searchBtn" type="submit">Search</button>
+        </form>
+        <div id="status" class="status" role="status" aria-live="polite"></div>
+      </section>
+
+      <section id="allOptionsPanel" class="panel all-options" hidden>
+        <h2>All Available Keywords</h2>
+        <ul id="allOptionsList"></ul>
+      </section>
+
+      <section id="suggestionsPanel" class="panel suggestions" hidden>
+        <h2>Did you mean</h2>
+        <ul id="suggestionsList"></ul>
+      </section>
+
+      <section id="resultPanel" class="panel result" hidden>
+        <h2 id="datasetTitle"></h2>
+        <p id="datasetMeta" class="meta"></p>
+
+        <div class="grid">
+          <article class="card">
+            <h3>
+              <span class="direction-icon inbound" aria-hidden="true"
+                >&#8594;</span
+              >
+              Inbound: Creators
+            </h3>
+            <p class="hint">
+              People or departments to talk to for generating this data.
+            </p>
+            <div class="card-divider" aria-hidden="true"></div>
+            <ul id="creatorsList"></ul>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="direction-icon outbound" aria-hidden="true"
+                >&#8594;</span
+              >
+              Outbound: Consumers
+            </h3>
+            <p class="hint">
+              People or departments that use this data downstream.
+            </p>
+            <div class="card-divider" aria-hidden="true"></div>
+            <ul id="consumersList"></ul>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
