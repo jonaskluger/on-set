@@ -144,30 +144,33 @@ def _dataset_dependencies(dataset: dict[str, Any]) -> dict[str, Any]:
     - outbound: edges from this dataset to each consumer
     - counts: number of inbound and outbound edges
     """
+    dataset_entity = {
+        "type": "dataset",
+        "id": dataset.get("id"),
+        "slug": dataset.get("slug"),
+        "name": dataset["name"],
+    }
+    # Avoid serializing empty identifiers so API clients don't receive null/blank id/slug.
+    dataset_entity = {
+        key: value
+        for key, value in dataset_entity.items()
+        if key not in {"id", "slug"} or (value is not None and str(value).strip() != "")
+    }
+
     inbound = [
         {
             "from": {
                 "type": "creator",
                 "name": creator,
             },
-            "to": {
-                "type": "dataset",
-                "id": dataset["id"],
-                "slug": dataset["slug"],
-                "name": dataset["name"],
-            },
+            "to": dataset_entity,
             "relationship": "creates",
         }
         for creator in dataset.get("creators", [])
     ]
     outbound = [
         {
-            "from": {
-                "type": "dataset",
-                "id": dataset["id"],
-                "slug": dataset["slug"],
-                "name": dataset["name"],
-            },
+            "from": dataset_entity,
             "to": {
                 "type": "consumer",
                 "name": consumer,

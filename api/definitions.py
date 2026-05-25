@@ -85,10 +85,10 @@ class DependencyGraph(BaseModel):
 
 
 class DataSetDependencyInfo(BaseModel):
-    id: str
+    id: str | None = None
     title: str
     name: str
-    slug: str
+    slug: str | None = None
     category: str
     scope: list[str]
     vfx_types: list[str]

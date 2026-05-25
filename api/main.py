@@ -250,6 +250,7 @@ def get_data_set(slug: str) -> dict[str, Any]:
 @app.get(
     "/api/v1/data-sets/{slug}/dependencies",
     response_model=DataSetDependenciesResponse,
+    response_model_exclude_none=True,
     responses={
         200: {
             "description": "Creator and consumer dependency edges for one data set.",
@@ -274,17 +275,24 @@ def get_data_set_dependencies(slug: str) -> dict[str, Any]:
             detail=f"Unknown dataset: {slug}. Try id like '4.2' or slug like 'hdris'.",
         )
 
+    dataset_info = {
+        "id": dataset.get("id"),
+        "title": dataset["title"],
+        "name": dataset["name"],
+        "slug": dataset.get("slug"),
+        "category": dataset["category"],
+        "scope": dataset["scope"],
+        "vfx_types": dataset["vfx_types"],
+    }
+    dataset_info = {
+        key: value
+        for key, value in dataset_info.items()
+        if key not in {"id", "slug"} or (value is not None and str(value).strip() != "")
+    }
+
     return {
         "data": {
-            "dataset": {
-                "id": dataset["id"],
-                "title": dataset["title"],
-                "name": dataset["name"],
-                "slug": dataset["slug"],
-                "category": dataset["category"],
-                "scope": dataset["scope"],
-                "vfx_types": dataset["vfx_types"],
-            },
+            "dataset": dataset_info,
             "dependencies": _dataset_dependencies(dataset),
         }
     }
