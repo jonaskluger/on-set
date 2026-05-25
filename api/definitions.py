@@ -108,12 +108,12 @@ HEALTH_EXAMPLE = {"status": "ok"}
 DEFINITION_LIST_EXAMPLE = {
     "data": [
         {
-            "name": "Physical Objects",
-            "description": "Collecting physical references such as props and environments.",
+            "name": "Set",
+            "description": "The physical build created by the Art Department or procured by Production for the purposes of filming.",
         },
         {
-            "name": "Appearance",
-            "description": "Surface look-dev data like material and color response.",
+            "name": "Virtual stage",
+            "description": "The environment which integrates physical and virtual production. Typically a set of LED panels, projection screens and/or process screens for keying.",
         },
     ],
     "meta": {"count": 2},
@@ -121,21 +121,21 @@ DEFINITION_LIST_EXAMPLE = {
 
 DEFINITION_DETAIL_EXAMPLE = {
     "data": {
-        "name": "Physical Objects",
-        "slug": "physical-objects",
-        "description": "Collecting physical references such as props and environments.",
+        "name": "Virtual stage",
+        "slug": "virtual-stage",
+        "description": "The environment which integrates physical and virtual production. Typically a set of LED panels, projection screens and/or process screens for keying.",
     }
 }
 
 VFX_TYPE_LIST_EXAMPLE = {
     "data": [
         {
-            "name": "CG Environment",
-            "description": "Digital world building and set extension workflows.",
+            "name": "Basic 2D VFX",
+            "description": "2-D blue screen, wire or rig removal, etc.",
         },
         {
-            "name": "FX",
-            "description": "Simulation-heavy work such as fire, smoke, water and destruction.",
+            "name": "Digital Matte Painting",
+            "description": "Can include 3-D environments, but could be 2D, does not include characters.",
         },
     ],
     "meta": {"count": 2},
@@ -143,9 +143,9 @@ VFX_TYPE_LIST_EXAMPLE = {
 
 VFX_TYPE_DETAIL_EXAMPLE = {
     "data": {
-        "name": "CG Environment",
-        "slug": "cg-environment",
-        "description": "Digital world building and set extension workflows.",
+        "name": "Basic 2D VFX",
+        "slug": "basic-2d-vfx",
+        "description": "2-D blue screen, wire or rig removal, etc.",
     }
 }
 
@@ -155,13 +155,13 @@ DATA_SET_LIST_EXAMPLE = {
             "id": "4.2",
             "name": "HDRIs",
             "slug": "hdris",
-            "category": "Environment",
+            "category": "4. Colour & Lighting Reference",
         },
         {
             "id": "3.1",
-            "name": "Textures",
-            "slug": "textures",
-            "category": "Materials",
+            "name": "Camera Reports",
+            "slug": "camera-reports",
+            "category": "3. Production Reports & Metadata",
         },
     ],
     "meta": {"count": 2},
@@ -173,18 +173,25 @@ DATA_SET_DETAIL_EXAMPLE = {
         "title": "4.2 HDRIs",
         "name": "HDRIs",
         "slug": "hdris",
-        "category": "Environment",
-        "description": "High dynamic range panoramas captured on set for image-based lighting.",
-        "usage": "Lighting, reflection look-dev, and environment integration for CG assets.",
-        "scope": ["Appearance", "Environment"],
-        "vfx_types": ["CG Environment", "CG Character", "FX"],
-        "data_collected": [
-            "360 bracketed RAW captures",
-            "Color checker chart frames",
-            "Sun and key light direction notes",
+        "category": "4. Colour & Lighting Reference",
+        "description": "Captures a full light spectrum.",
+        "usage": "Enables accurate recreation of on-set lighting in CG.",
+        "scope": ["Lighting Setup"],
+        "vfx_types": [
+            "Basic 2D VFX",
+            "Digital Matte Painting",
+            "Complex VFX",
+            "Virtual Production",
+            "Real time",
         ],
-        "creators": ["On-Set Data Wrangler", "Lighting Reference Team"],
-        "consumers": ["Lighting", "Look Development", "Compositing"],
+        "data_collected": [
+            "360° Hdr Images Of The Set Lighting Per Camera Setup",
+        ],
+        "creators": ["Data Wrangler", "VFX On-set Vendor"],
+        "consumers": [
+            "Studio Marketing For Commercial Or Game Creation",
+            "VFX Post Production Vendor",
+        ],
     }
 }
 
@@ -195,14 +202,20 @@ DEPENDENCIES_EXAMPLE = {
             "title": "4.2 HDRIs",
             "name": "HDRIs",
             "slug": "hdris",
-            "category": "Environment",
-            "scope": ["Appearance", "Environment"],
-            "vfx_types": ["CG Environment", "FX"],
+            "category": "4. Colour & Lighting Reference",
+            "scope": ["Lighting Setup"],
+            "vfx_types": [
+                "Basic 2D VFX",
+                "Digital Matte Painting",
+                "Complex VFX",
+                "Virtual Production",
+                "Real time",
+            ],
         },
         "dependencies": {
             "inbound": [
                 {
-                    "from": {"type": "creator", "name": "On-Set Data Wrangler"},
+                    "from": {"type": "creator", "name": "Data Wrangler"},
                     "to": {
                         "type": "dataset",
                         "id": "4.2",
@@ -210,7 +223,17 @@ DEPENDENCIES_EXAMPLE = {
                         "name": "HDRIs",
                     },
                     "relationship": "creates",
-                }
+                },
+                {
+                    "from": {"type": "creator", "name": "VFX On-set Vendor"},
+                    "to": {
+                        "type": "dataset",
+                        "id": "4.2",
+                        "slug": "hdris",
+                        "name": "HDRIs",
+                    },
+                    "relationship": "creates",
+                },
             ],
             "outbound": [
                 {
@@ -220,11 +243,24 @@ DEPENDENCIES_EXAMPLE = {
                         "slug": "hdris",
                         "name": "HDRIs",
                     },
-                    "to": {"type": "consumer", "name": "Lighting"},
+                    "to": {
+                        "type": "consumer",
+                        "name": "Studio Marketing For Commercial Or Game Creation",
+                    },
                     "relationship": "consumed_by",
-                }
+                },
+                {
+                    "from": {
+                        "type": "dataset",
+                        "id": "4.2",
+                        "slug": "hdris",
+                        "name": "HDRIs",
+                    },
+                    "to": {"type": "consumer", "name": "VFX Post Production Vendor"},
+                    "relationship": "consumed_by",
+                },
             ],
-            "counts": {"inbound": 1, "outbound": 1},
+            "counts": {"inbound": 2, "outbound": 2},
         },
     }
 }
@@ -232,27 +268,36 @@ DEPENDENCIES_EXAMPLE = {
 RAW_DATA_EXAMPLE = {
     "Scope Definitions": [
         {
-            "Appearance": "Surface-level references that define look and material response."
+            "Set": "The physical build created by the Art Department or procured by Production for the purposes of filming."
         }
     ],
-    "VFX Types": [
-        {"CG Environment": "Digital set extension and world building tasks."}
-    ],
+    "VFX Types": [{"Basic 2D VFX": "2-D blue screen, wire or rig removal, etc."}],
     "Data Sets": [
         {
-            "title": "Environment",
+            "title": "4. Colour & Lighting Reference",
             "subsections": [
                 {
                     "title": "4.2 HDRIs",
                     "items": [
                         {
-                            "Creator": ["On-Set Data Wrangler"],
-                            "Consumer": ["Lighting"],
-                            "VFXTypes": ["CG Environment"],
-                            "Scope": ["Appearance"],
-                            "Description": "High dynamic range panoramic lighting captures.",
-                            "Usage": "Primary image-based lighting reference for shots.",
-                            "Data Collected": ["Bracketed RAW panoramas"],
+                            "Creator": ["Data Wrangler", "VFX On-set Vendor"],
+                            "Consumer": [
+                                "Studio Marketing For Commercial Or Game Creation",
+                                "VFX Post Production Vendor",
+                            ],
+                            "VFXTypes": [
+                                "Basic 2D VFX",
+                                "Digital Matte Painting",
+                                "Complex VFX",
+                                "Virtual Production",
+                                "Real time",
+                            ],
+                            "Scope": ["Lighting Setup"],
+                            "Description": "Captures a full light spectrum.",
+                            "Usage": "Enables accurate recreation of on-set lighting in CG.",
+                            "Data Collected": [
+                                "360° Hdr Images Of The Set Lighting Per Camera Setup"
+                            ],
                         }
                     ],
                 }
