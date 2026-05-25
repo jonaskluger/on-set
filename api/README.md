@@ -23,7 +23,7 @@ Open:
 - `GET /api/v1/vfx-types/{slug}`
 - `GET /api/v1/data-sets`
 - `GET /api/v1/data-sets/{slug}`
-- `GET /api/v1/data-sets/{dataset_ref}/dependencies`
+- `GET /api/v1/data-sets/{slug}/dependencies`
 - `GET /api/v1/raw`
 
 `GET /api/v1/raw` proxies upstream data from `https://ves-on-set-data.org/data/data.json`.

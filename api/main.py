@@ -248,7 +248,7 @@ def get_data_set(slug: str) -> dict[str, Any]:
 
 
 @app.get(
-    "/api/v1/data-sets/{dataset_ref}/dependencies",
+    "/api/v1/data-sets/{slug}/dependencies",
     response_model=DataSetDependenciesResponse,
     responses={
         200: {
@@ -262,16 +262,16 @@ def get_data_set(slug: str) -> dict[str, Any]:
         },
     },
 )
-def get_data_set_dependencies(dataset_ref: str) -> dict[str, Any]:
+def get_data_set_dependencies(slug: str) -> dict[str, Any]:
     data = _load_data()
     _, index = _dataset_lookup(data)
 
-    lookup_key = dataset_ref.lower()
+    lookup_key = slug.lower()
     dataset = index.get(lookup_key)
     if not dataset:
         raise HTTPException(
             status_code=404,
-            detail=f"Unknown dataset: {dataset_ref}. Try id like '4.2' or slug like 'hdris'.",
+            detail=f"Unknown dataset: {slug}. Try id like '4.2' or slug like 'hdris'.",
         )
 
     return {
